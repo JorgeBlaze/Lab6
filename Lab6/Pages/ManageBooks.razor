@@ -1,0 +1,46 @@
+﻿@page "/ManageBooks"
+@using Lab6.Data
+
+<h3>Manage Books</h3>
+
+<div>
+    <label for="title">Title:</label>
+    <input type="text" id="title" @bind="Title" />
+</div>
+
+<div>
+    <label for="author">Author:</label>
+    <input type="text" id="author" @bind="Author" />
+</div>
+
+<div>
+    <label for="isbn">ISBN:</label>
+    <input type="text" id="isbn" @bind="ISBN" />
+</div>
+
+<button @onclick="AddBook">Add Book</button>
+
+@if (!string.IsNullOrEmpty(FeedbackMessage))
+{
+    <p>@FeedbackMessage</p>
+}
+@code {
+    private string Title { get; set; }
+    private string Author { get; set; }
+    private string ISBN { get; set; }
+    string FeedbackMessage { get; set; }
+    private int nextId = 1; 
+   
+    private void AddBook()
+    {
+        var newBook = new Book { Id = nextId++, Title = Title, Author = Author, ISBN = ISBN };
+        IData.books.Add(newBook);
+    
+        FeedbackMessage = "Book added successfully!";
+        Title = "";
+        Author = "";
+        ISBN = "";
+
+
+    }
+}

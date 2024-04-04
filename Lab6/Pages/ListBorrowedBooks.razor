@@ -1,0 +1,24 @@
+﻿@page "/ListBorrowedBooks"
+@using Lab6.Data
+
+
+@if (IData.borrowedBooks != null && IData.borrowedBooks.Any())
+{
+    <ul>
+        @foreach (var entry in IData.borrowedBooks)
+        {
+            <li>User: @entry.Key.Name</li>
+            <ul>
+                @foreach (var book in entry.Value)
+                {
+                    <li>@book.Title by @book.Author (ISBN: @book.ISBN)</li>
+                }
+            </ul>
+        }
+    </ul>
+}
+else
+{
+    <p>No borrowed books to display.</p>
+}
+

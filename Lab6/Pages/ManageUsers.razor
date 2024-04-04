@@ -1,0 +1,143 @@
+﻿@page "/Manageusers"
+@using Lab6.Data
+
+<div style="margin-bottom: 20px;">
+<h3>ManageUsers</h3>
+
+<div>
+    <label for="name">User Name:</label>
+    <input type="text" id="name" @bind="UserName" />
+</div>
+<div>
+    <label for="email">Email:</label>
+    <input type="email" id="email" @bind="UserEmail" />
+</div>
+<div>
+    <button @onclick="AddUser">Add User</button>
+</div>
+
+@if (!string.IsNullOrEmpty(FeedbackMessage))
+{
+    <p>@FeedbackMessage</p>
+}
+</div>
+
+
+
+
+<div style="margin-bottom: 20px;">
+<h3>Edit User</h3>
+
+<p>Select a user to edit:</p>
+<select @bind="SelectedUserId1">
+    @foreach (var user in IData.users)
+    {
+        <option value="@user.Id">@user.Name</option>
+    }
+</select>
+
+<button @onclick="EditUser">Edit User</button>
+
+<p>@FeedbackMessage</p>
+</div>
+<div style="margin-bottom: 20px;">
+<h3>Delete User</h3>
+
+<p>Select a user to delete:</p>
+<select @bind="SelectedUserId2">
+    @foreach (var user in IData.users)
+    {
+        <option value="@user.Id">@user.Name</option>
+    }
+</select>
+
+<button @onclick="DeleteUser">Delete User</button>
+
+<p>@FeedbackMessage</p>
+</div>
+
+
+<div style="margin-bottom: 20px;">
+    <h3>List Users</h3>
+
+    @foreach (var user in IData.users)
+    {
+        <p>@($"{user.Id}. {user.Name} (Email: {user.Email})")</p>
+    }
+</div>
+
+
+
+@code {
+    string UserName { get; set; }
+    string UserEmail { get; set; }
+    string FeedbackMessage { get; set; }
+
+    private void AddUser()
+    {
+        if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(UserEmail))
+        {
+            FeedbackMessage = "Please provide both user name and email.";
+            return;
+        }
+
+        int nextId = IData.users.Count > 0 ? IData.users.Max(u => u.Id) + 1 : 1;
+        IData.users.Add(new User { Id = nextId, Name = UserName, Email = UserEmail });
+
+      
+            FeedbackMessage = "User added successfully!";
+            UserName = ""; 
+            UserEmail = "";
+       
+    }
+
+    private int SelectedUserId1 { get; set; }
+
+
+
+    private void EditUser()
+    {
+        var user = IData.users.FirstOrDefault(u => u.Id == SelectedUserId1);
+
+        if (user != null)
+        {
+            if (!string.IsNullOrWhiteSpace(UserName))
+            {
+                user.Name = UserName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(UserEmail))
+            {
+                user.Email = UserEmail;
+            }
+
+            FeedbackMessage = "User updated successfully!\n";
+        }
+        else
+        {
+            FeedbackMessage = "User not found!\n";
+        }
+    }
+
+    private int SelectedUserId2 { get; set; }
+
+    private void DeleteUser()
+    {
+        var user = IData.users.FirstOrDefault(u => u.Id == SelectedUserId2);
+
+        if (user != null)
+        {
+            IData.users.Remove(user);
+            FeedbackMessage = "User deleted successfully!\n";
+        }
+        else
+        {
+            FeedbackMessage = "User not found!\n";
+        }
+    }
+
+
+
+
+
+}

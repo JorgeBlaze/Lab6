@@ -1,0 +1,102 @@
+﻿@page "/ReturnBook"
+@using Lab6.Data
+
+
+<h3>ReturnBook</h3>
+
+
+@if (IData.borrowedBooks != null && IData.borrowedBooks.Any())
+{
+    <ul>
+        @foreach (var entry in IData.borrowedBooks)
+        {
+            <li>User: @entry.Key.Name</li>
+            <ul>
+                @foreach (var book in entry.Value)
+                {
+                    <li>@book.Title by @book.Author (ISBN: @book.ISBN)</li>
+                }
+            </ul>
+        }
+    </ul>
+
+    <div>
+        <label for="userName">Enter User Name to return a book for:</label>
+        <input type="text" id="userName" @bind="UserName" />
+    </div>
+
+    <div>
+        <label for="bookTitle">Select Book to Return:</label>
+        <select @bind="SelectedBookId">
+            @foreach (var entry in IData.borrowedBooks.Where(e => e.Key.Name == UserName))
+            {
+                @foreach (var book in entry.Value)
+                {
+                    <option value="@book.Title">@book.Title</option>
+                }
+            }
+        </select>
+    </div>
+
+    <button @onclick="UpdateBookList">Update Book List</button> <!-- Button to update the book list -->
+
+    <button @onclick="ReturntheBook">Return Book</button>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <p>@ErrorMessage</p>
+    }
+}
+else
+{
+    <p>No borrowed books to display.</p>
+}
+
+
+
+@code {
+    string UserName { get; set; }
+    string ErrorMessage { get; set; }
+    string SelectedBookId { get; set; }
+
+    private void ReturntheBook()
+    {
+        if (string.IsNullOrEmpty(UserName))
+        {
+            ErrorMessage = "Please enter a user name.";
+            return;
+        }
+
+        User user = IData.users.FirstOrDefault(u => u.Name == UserName);
+
+        if (user != null && IData.borrowedBooks.ContainsKey(user) && IData.borrowedBooks[user].Count > 0)
+        {
+            var bookToRemove = IData.borrowedBooks[user].FirstOrDefault(b => b.Title == SelectedBookId);
+            if (bookToRemove != null)
+            {
+                IData.borrowedBooks[user].Remove(bookToRemove);
+                ErrorMessage = "Book returned successfully!";
+            }
+            else
+            {
+                ErrorMessage = "Selected book not found.";
+            }
+        }
+        else
+        {
+            ErrorMessage = "User not found or no borrowed books.";
+        }
+ 
+    
+    }
+
+    private void UpdateBookList()
+    {
+        StateHasChanged(); 
+    }
+
+
+}
+
+
+

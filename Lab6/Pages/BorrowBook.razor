@@ -1,0 +1,175 @@
+﻿@page "/borrowbook"
+@using Lab6.Data  
+
+
+<div style="margin-bottom: 20px;">
+<h3>Borrow Book</h3>
+
+<p>Select a book to borrow:</p>
+<select @bind="SelectedBookId">
+    @foreach (var book in IData.books)
+    {
+        <option value="@book.Id">@book.Title</option>
+    }
+</select>
+
+<p>Select a user to borrow the book:</p>
+<select @bind="SelectedUserId">
+    @foreach (var user in IData.users)
+    {
+        <option value="@user.Id">@user.Name</option>
+    }
+</select>
+<button @onclick="BorrowaBook">Borrow Book</button>
+    <p>@FeedbackMessage</p>
+</div>
+
+
+
+<div style="margin-bottom: 20px;">
+    <h3>Edit Book</h3>
+
+    <p>Select a book to edit:</p>
+    <select @bind="SelectedBookId1">
+        @foreach (var book in IData.books)
+        {
+            <option value="@book.Id">@book.Title</option>
+        }
+    </select>
+    <button @onclick="EditBook">Edit Book</button>
+    <p>@FeedbackMessage1</p>
+
+    <div>
+        <label for="newTitle">New Title:</label>
+        <input type="text" id="newTitle" @bind="NewTitle" />
+    </div>
+    <div>
+        <label for="newAuthor">New Author:</label>
+        <input type="text" id="newAuthor" @bind="NewAuthor" />
+    </div>
+    <div>
+        <label for="newISBN">New ISBN:</label>
+        <input type="text" id="newISBN" @bind="NewISBN" />
+    </div>
+</div>
+
+
+
+<div style="margin-bottom: 20px;">
+    <h3>Delete Book</h3>
+
+    <p>Select a book to delete:</p>
+    <select @bind="SelectedBookId2">
+        @foreach (var book in IData.books)
+        {
+            <option value="@book.Id">@book.Title</option>
+        }
+    </select>
+
+    <button @onclick="DeleteBook">Delete Book</button>
+
+    <p>@FeedbackMessage2</p>
+</div>
+
+<div>
+    <h3>Available Books</h3>
+
+    @foreach (var group in IData.books.GroupBy(b => b.Title).Select(bookGroup => new { Book = bookGroup.First(), Count = bookGroup.Count() }))
+    {
+        <p>@($"{group.Book.Id}. {group.Book.Title} by {group.Book.Author} (ISBN: {group.Book.ISBN}) - Available Copies: {group.Count}")</p>
+    }
+
+</div>
+
+
+
+@code {
+
+
+    private int SelectedBookId { get; set; }
+    private int SelectedUserId { get; set; }
+
+    private void BorrowaBook()
+    {
+        var book = IData.books.FirstOrDefault(b => b.Id == SelectedBookId);
+        var user = IData.users.FirstOrDefault(u => u.Id == SelectedUserId);
+
+        if (book != null && user != null)
+        {
+            if (!IData.borrowedBooks.ContainsKey(user))
+            {
+                IData.borrowedBooks[user] = new List<Book>(); 
+            }
+
+    
+            IData.borrowedBooks[user].Add(book);
+
+            FeedbackMessage = "Book borrowed successfully!";
+        }
+        else
+        {
+            FeedbackMessage = "Book or user not found!";
+        }
+    }
+
+
+
+    private int SelectedBookId1 { get; set; }
+    private string NewTitle { get; set; }
+    private string NewAuthor { get; set; }
+    private string NewISBN { get; set; }
+    private string FeedbackMessage { get; set; }    
+    private string FeedbackMessage1 { get; set; }
+    private string FeedbackMessage2 { get; set; }
+
+    private void EditBook()
+    {
+        var book = IData.books.FirstOrDefault(b => b.Id == SelectedBookId1);
+
+        if (book != null)
+        {
+            if (!string.IsNullOrWhiteSpace(NewTitle))
+            {
+                book.Title = NewTitle;
+            }
+
+            if (!string.IsNullOrWhiteSpace(NewAuthor))
+            {
+                book.Author = NewAuthor;
+            }
+
+            if (!string.IsNullOrWhiteSpace(NewISBN))
+            {
+                book.ISBN = NewISBN;
+            }
+
+            FeedbackMessage1 = "Book updated successfully!";
+        }
+        else
+        {
+            FeedbackMessage1 = "Book not found!";
+        }
+    }
+
+    private int SelectedBookId2 { get; set; }
+ 
+
+    private void DeleteBook()
+    {
+        var book = IData.books.FirstOrDefault(b => b.Id == SelectedBookId2);
+
+        if (book != null)
+        {
+            IData.books.Remove(book);
+            FeedbackMessage2 = "Book deleted successfully!";
+        }
+        else
+        {
+            FeedbackMessage2 = "Book not found!";
+        }
+    }
+
+
+
+
+}
